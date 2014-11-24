@@ -1,6 +1,6 @@
 # MockEtcd
 
-TODO: Write a gem description
+MockEtcd is mock for [etcd-ruby](https://github.com/ranjib/etcd-ruby)
 
 ## Installation
 
