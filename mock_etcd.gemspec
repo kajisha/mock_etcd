@@ -10,7 +10,7 @@ Gem::Specification.new do |spec|
   spec.email         = ['kajisha@gmail.com']
   spec.summary       = %q{mock etcd-ruby}
   spec.description   = %q{mock etcd-ruby}
-  spec.homepage      = ''
+  spec.homepage      = 'https://github.com/kajisha/mock_etcd'
   spec.license       = 'MIT'
 
   spec.files         = `git ls-files -z`.split("\x0")
