@@ -1,17 +1,21 @@
-require 'etcd/client'
 require 'webmock'
-include WebMock::API
+require 'etcd/client'
 
 module MockEtcd
   class Client < Etcd::Client
+    include WebMock::API
+
     attr_reader :nodes
 
     def initialize(opts = {})
       @index = 0
       @nodes = {}
 
+      WebMock.disable_net_connect! allow_localhost: false
+
       super
     end
+
     def api_execute(path, method, options = {})
       stub_request! path, method, options
 
@@ -47,7 +51,7 @@ module MockEtcd
       node = create_node_with_index(key, options[:params][:value])
 
       stub_request(:post, uri(path))
-        .with(body: 'value=' + URI.encode_www_form([options[:params][:value]]), headers: request_header)
+        .with(body: 'value=' + URI.encode_www_form([options[:params][:value]]))
         .to_return(status: 201, body: response_body('create', key, node), headers: response_header(node))
     end
 
@@ -55,7 +59,7 @@ module MockEtcd
       node = create_node(key, options[:params][:value])
 
       stub_request(:put, uri(path))
-        .with(body: 'value=' + URI.encode_www_form([options[:params][:value]]), headers: request_header)
+        .with(body: 'value=' + URI.encode_www_form([options[:params][:value]]))
         .to_return(status: 200, body: response_body('set', key, node), headers: response_header(node))
     end
 
@@ -64,7 +68,6 @@ module MockEtcd
       stub_key_not_found(:delete, key, path) and return unless node
 
       stub_request(:delete, uri(path))
-        .with(headers: request_header)
         .to_return(status: 200, body: response_body('delete', key, node), headers: response_header(node))
     end
 
@@ -123,14 +126,6 @@ module MockEtcd
 
     def uri(path)
       "http://#{host}:#{port}#{path}"
-    end
-
-    def request_header
-      {
-        'Accept' => '*/*',
-        'Accept-Encoding' => 'gzip;q=1.0,deflate;q=0.6,identity;q=0.3',
-        'User-Agent' => 'Ruby'
-      }
     end
 
     def response_body(action, key, node)
